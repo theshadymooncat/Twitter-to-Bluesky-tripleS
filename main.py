@@ -1,9 +1,9 @@
 import os
 import json
-import snscrape.modules.twitter as sntwitter
+import feedparser
 from atproto import Client
 
-TWITTER_HANDLE = os.environ["TWITTER_HANDLE"]
+NITTER_RSS = "https://nitter.net/official_artms/rss"
 BLUESKY_HANDLE = os.environ["BLUESKY_HANDLE"]
 BLUESKY_PASSWORD = os.environ["BLUESKY_PASSWORD"]
 STATE_FILE = "seen_ids.json"
@@ -19,17 +19,14 @@ def save_seen(seen):
         json.dump(list(seen), f)
 
 def fetch_tweets():
+    feed = feedparser.parse(NITTER_RSS)
     tweets = []
-    try:
-        for tweet in sntwitter.TwitterUserScraper(TWITTER_HANDLE).get_items():
-            if len(tweets) >= 10:
-                break
-            if tweet.rawContent.startswith("RT @") or tweet.inReplyToTweetId:
-                continue
-            tweets.append({"id": str(tweet.id), "text": tweet.rawContent})
-        print(f"Fetched {len(tweets)} tweets from @{TWITTER_HANDLE}")
-    except Exception as e:
-        print(f"Error fetching tweets: {e}")
+    for entry in feed.entries[:10]:
+        if entry.title.startswith("RT by") or entry.title.startswith("R to"):
+            continue
+        tweet_id = entry.link.split("/status/")[1].split("#")[0]
+        tweets.append({"id": tweet_id, "text": entry.title})
+    print(f"Fetched {len(tweets)} tweets")
     return tweets
 
 def post_to_bluesky(text):
@@ -44,7 +41,7 @@ def post_to_bluesky(text):
 def main():
     seen = load_seen()
     tweets = fetch_tweets()
-    for tw in reversed(tweets):  # oldest first
+    for tw in reversed(tweets):
         if tw["id"] in seen:
             continue
         print("Reposting:", tw["text"][:80])
