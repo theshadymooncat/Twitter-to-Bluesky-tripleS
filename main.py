@@ -43,7 +43,9 @@ def fetch_tweets():
                 # This is a video — fetch the nitter page to get the video URL
                 status_url = NITTER_BASE + a["href"].replace(NITTER_BASE, "")
                 try:
-                    resp = requests.get(status_url, timeout=10)
+                    resp = requests.get(status_url, timeout=10, headers={
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0"
+})
                     print(f"Fetching video from: {status_url}")
                     print(f"Status page HTML snippet: {resp.text[:500]}")
                     status_soup = BeautifulSoup(resp.text, "html.parser")
