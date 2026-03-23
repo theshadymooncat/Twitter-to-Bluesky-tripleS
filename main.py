@@ -41,7 +41,7 @@ def fetch_tweets():
             img = a.find("img")
             if img and "/status/" in a["href"]:
                 # This is a video — fetch the nitter page to get the video URL
-                status_url = NITTER_BASE + a["href"].replace(NITTER_BASE, "")
+                status_url = NITTER_BASE + a["href"].replace(NITTER_BASE, "").split("#")[0]
                 try:
                     resp = requests.get(status_url, timeout=10, headers={
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0"
