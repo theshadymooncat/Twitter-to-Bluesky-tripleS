@@ -75,12 +75,12 @@ def fetch_tweets():
             if "/status/" in a["href"]:
                 href = a["href"].split("#")[0]
 
-                    # Normalize to path only
-                    if href.startswith("http"):
+                # Normalize to path only
+                if href.startswith("http"):
                     # Remove domain (nitter or twitter)
                     tweet_path = "/" + href.split("/", 3)[3]
-else:
-    tweet_path = href
+                else:
+                    tweet_path = href
                 img = a.find("img")
                 if img:
                     src = img.get("src", "")
